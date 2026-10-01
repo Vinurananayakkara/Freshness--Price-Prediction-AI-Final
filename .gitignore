@@ -1,0 +1,148 @@
+# ============================================================
+# ENVIRONMENT / SECRETS
+# ============================================================
+
+.env
+.env.*
+!.env.example
+
+# ============================================================
+# PYTHON / FASTAPI BACKEND
+# ============================================================
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python packaging
+*.egg
+*.egg-info/
+dist/
+build/
+develop-eggs/
+.eggs/
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Type checking / linting caches
+.mypy_cache/
+.pyre/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ============================================================
+# DATABASE
+# ============================================================
+
+# Local SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================================
+# USER UPLOADS / GENERATED FILES
+# ============================================================
+
+backend/uploads/*
+backend/uploads/**
+
+# Keep the uploads directory itself if needed
+!backend/uploads/.gitkeep
+
+# Generated files
+backend/logs/
+backend/*.log
+*.log
+
+# ============================================================
+# NODE / REACT / VITE FRONTEND
+# ============================================================
+
+frontend/node_modules/
+
+# Vite build output
+frontend/dist/
+frontend/build/
+
+# Vite local environment files
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# ============================================================
+# FRONTEND CACHE / GENERATED FILES
+# ============================================================
+
+frontend/.vite/
+frontend/.cache/
+frontend/.parcel-cache/
+
+# ============================================================
+# IDE / EDITORS
+# ============================================================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# VS Code local history
+.history/
+
+# ============================================================
+# OPERATING SYSTEM FILES
+# ============================================================
+
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ============================================================
+# TEMPORARY FILES
+# ============================================================
+
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.swo
+
+# ============================================================
+# DOCKER
+# ============================================================
+
+# Docker local override files
+docker-compose.override.yml
+
+# ============================================================
+# FRONTEND DEBUG LOGS
+# ============================================================
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ============================================================
+# RUNTIME / LOCAL CONFIG
+# ============================================================
+
+*.pid
+*.seed

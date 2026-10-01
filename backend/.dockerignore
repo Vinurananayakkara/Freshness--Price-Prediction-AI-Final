@@ -1,0 +1,14 @@
+.env
+
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+.git/
+.gitignore
+
+uploads/*
+*.log
+
+app_users.db

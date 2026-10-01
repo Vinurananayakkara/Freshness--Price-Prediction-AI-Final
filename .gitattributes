@@ -1,0 +1,72 @@
+# ============================================================
+# DEFAULT
+# ============================================================
+
+* text=auto
+
+# ============================================================
+# TEXT FILES - FORCE LF
+# ============================================================
+
+*.py     text eol=lf
+*.js     text eol=lf
+*.jsx    text eol=lf
+*.ts     text eol=lf
+*.tsx    text eol=lf
+
+*.json   text eol=lf
+*.md     text eol=lf
+*.txt    text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.xml    text eol=lf
+*.html   text eol=lf
+*.css    text eol=lf
+*.scss   text eol=lf
+
+*.sh     text eol=lf
+*.bat    text eol=crlf
+*.ps1    text eol=crlf
+
+# Docker
+Dockerfile text eol=lf
+.dockerignore text eol=lf
+
+# Environment examples
+.env.example text eol=lf
+
+# ============================================================
+# BINARY FILES
+# ============================================================
+
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.bmp   binary
+*.tiff  binary
+
+*.pdf   binary
+*.zip   binary
+*.7z    binary
+*.rar   binary
+
+# Machine learning model files
+*.keras binary
+*.h5    binary
+*.hdf5  binary
+*.pkl   binary
+*.pickle binary
+
+# Other binary files
+*.exe   binary
+*.dll   binary
+*.so    binary
+*.bin   binary
+
+# SQLite databases
+*.db    binary
+*.sqlite binary
+*.sqlite3 binary

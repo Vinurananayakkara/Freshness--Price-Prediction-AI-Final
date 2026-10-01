@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base reset & fonts ───────────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #12241D;
+    background-image:
+      radial-gradient(ellipse at top left,  rgba(232, 163, 61, 0.07), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(127, 181, 110, 0.04), transparent 50%),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 27px,
+        rgba(243, 239, 226, 0.03) 28px
+      );
+    color: #F3EFE2;
+    font-family: "Public Sans", "Inter", sans-serif;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3 {
+    font-family: "Fraunces", Georgia, serif;
+  }
+
+  *::selection {
+    background-color: rgba(232, 163, 61, 0.3);
+    color: #F3EFE2;
+  }
+}
+
+/* ─── Ledger dividers ───────────────────────────────────────────────── */
+.ledger-row + .ledger-row {
+  border-top: 1px solid #2C4A3C;
+}
+
+/* ─── Freshness stamp badge ─────────────────────────────────────────── */
+.stamp {
+  transform: rotate(-4deg);
+  border: 3px dashed currentColor;
+  border-radius: 9999px;
+  user-select: none;
+}
+
+.stamp-in {
+  animation: stamp-down 260ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes stamp-down {
+  0%   { transform: rotate(-4deg) scale(1.6); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: rotate(-4deg) scale(1);   opacity: 1; }
+}
+
+/* ─── Result card fade-in ────────────────────────────────────────────── */
+.fade-up {
+  animation: fade-up 400ms ease-out both;
+}
+
+@keyframes fade-up {
+  0%   { transform: translateY(12px); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 1; }
+}
+
+/* ─── Form inputs ────────────────────────────────────────────────────── */
+.field-input {
+  background-color: rgba(243, 239, 226, 0.05);
+  border: 1px solid #2C4A3C;
+  color: #F3EFE2;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+.field-input:hover {
+  border-color: rgba(44, 74, 60, 0.9);
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: #E8A33D;
+  box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.2);
+}
+
+.field-input::placeholder {
+  color: rgba(243, 239, 226, 0.30);
+}
+
+/* Style native selects to match dark theme */
+.field-input option {
+  background-color: #1B3229;
+  color: #F3EFE2;
+}
+
+/* Range slider */
+input[type="range"] {
+  accent-color: #E8A33D;
+}
+
+/* ─── Custom scrollbar ───────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 8px; }
+::-webkit-scrollbar-track { background: #12241D; }
+::-webkit-scrollbar-thumb {
+  background: #2C4A3C;
+  border-radius: 6px;
+  border: 2px solid #12241D;
+}
+::-webkit-scrollbar-thumb:hover { background: #3a5e4e; }
+
+/* ─── Loading spinner ────────────────────────────────────────────────── */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(232, 163, 61, 0.3);
+  border-top-color: #E8A33D;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Glassmorphism panel utility ───────────────────────────────────── */
+.glass-panel {
+  background: rgba(27, 50, 41, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(44, 74, 60, 0.8);
+}

@@ -1,0 +1,2 @@
+docker rm produce-backend-container 
+docker run --name produce-backend-container -p 8000:8000 --env-file .env produce-backend
