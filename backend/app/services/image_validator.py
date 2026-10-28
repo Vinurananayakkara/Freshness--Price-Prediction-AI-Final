@@ -1,16 +1,12 @@
-from PIL import Image
+
+from functools import lru_cache
+
 import torch
+from PIL import Image
 from transformers import CLIPModel, CLIPProcessor
 
 
 MODEL_NAME = "openai/clip-vit-base-patch32"
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-
-processor = CLIPProcessor.from_pretrained(MODEL_NAME)
-model = CLIPModel.from_pretrained(MODEL_NAME)
-model.to(device)
-model.eval()
 
 
 SUPPORTED_LABELS = [
@@ -41,7 +37,24 @@ UNSUPPORTED_LABELS = [
 ALL_LABELS = SUPPORTED_LABELS + UNSUPPORTED_LABELS
 
 
+@lru_cache(maxsize=1)
+def load_clip():
+    """Load and cache the CLIP model on its first use."""
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    processor = CLIPProcessor.from_pretrained(MODEL_NAME)
+    model = CLIPModel.from_pretrained(MODEL_NAME)
+
+    model.to(device)
+    model.eval()
+
+    return processor, model, device
+
+
 def validate_produce_image(image: Image.Image) -> dict:
+    """Classify an image as supported produce or unsupported content."""
+    processor, model, device = load_clip()
+
     image = image.convert("RGB")
 
     inputs = processor(
@@ -58,27 +71,13 @@ def validate_produce_image(image: Image.Image) -> dict:
 
     with torch.no_grad():
         outputs = model(**inputs)
+        probabilities = outputs.logits_per_image.softmax(dim=1)[0]
 
-        probabilities = outputs.logits_per_image.softmax(
-            dim=1
-        )[0]
-
-    best_index = int(
-        torch.argmax(probabilities).item()
-    )
-
-    best_score = float(
-        probabilities[best_index].item()
-    )
-
-    best_label = ALL_LABELS[best_index]
-
-    supported = best_index < len(
-        SUPPORTED_LABELS
-    )
+    best_index = int(torch.argmax(probabilities).item())
+    best_score = float(probabilities[best_index].item())
 
     return {
-        "supported": supported,
-        "label": best_label,
+        "supported": best_index < len(SUPPORTED_LABELS),
+        "label": ALL_LABELS[best_index],
         "score": round(best_score, 4),
     }
