@@ -146,3 +146,12 @@ pnpm-debug.log*
 
 *.pid
 *.seed
+
+# Temporary project archives
+*.zip
+*.rar
+
+# Local test images
+backend/test_images/
+
+/start

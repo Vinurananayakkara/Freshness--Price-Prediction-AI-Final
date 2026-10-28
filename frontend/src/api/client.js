@@ -52,3 +52,33 @@ export async function apiPostForm(path, formData) {
   });
   return handleResponse(res);
 }
+
+
+export async function apiPatch(path, jsonBody) {
+  const token = getToken();
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(jsonBody),
+  });
+
+  return handleResponse(res);
+}
+
+
+export async function apiDelete(path) {
+  const token = getToken();
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "DELETE",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  return handleResponse(res);
+}

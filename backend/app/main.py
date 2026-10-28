@@ -10,6 +10,10 @@ from app.api.freshness import router as freshness_router
 from app.api.price import router as price_router
 from app.api.hybrid import router as hybrid_router
 
+from app.api.profile import router as profile_router
+from app.api.recommendations import router as recommendations_router
+
+from app.utils.district_data import DISTRICT_NAMES
 # Create the users table on startup if it doesn't exist yet.
 Base.metadata.create_all(bind=engine)
 
@@ -32,9 +36,23 @@ app.include_router(freshness_router, prefix="/api", tags=["freshness"])
 app.include_router(price_router, prefix="/api", tags=["price"])
 app.include_router(hybrid_router, prefix="/api", tags=["hybrid"])
 
+app.include_router(
+    profile_router,
+    prefix="/api/profile",
+    tags=["profile"],
+)
+app.include_router(
+    recommendations_router,
+    prefix="/api/recommendations",
+    tags=["recommendations"],
+)
 
 @app.get("/")
 def home():
     return {
         "message": "Backend Running Successfully"
     }
+
+@app.get("/api/districts")
+def get_districts():
+    return {"districts": DISTRICT_NAMES}

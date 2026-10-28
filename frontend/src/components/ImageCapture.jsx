@@ -1,113 +1,135 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-export default function ImageCapture({ onFileSelected }) {
-  const fileInputRef   = useRef(null);
-  const cameraInputRef = useRef(null);
-  const [previewUrl, setPreviewUrl]  = useState(null);
-  const [fileName,  setFileName]     = useState(null);
+/** Shared image picker: multi-image mode when onFilesChange is provided. */
+export default function ImageCapture({ onFilesChange, onFileSelected, resetKey = 0, disabled = false }) {
+  const uploadRef = useRef(null);
+  const cameraRef = useRef(null);
+  const itemsRef = useRef([]);
+  const callbacksRef = useRef({ onFilesChange, onFileSelected });
+  const lastResetKey = useRef(resetKey);
+  const [items, setItems] = useState([]);
+  const isMulti = typeof onFilesChange === "function";
+  callbacksRef.current = { onFilesChange, onFileSelected };
 
-  function handleFile(file) {
-    if (!file) return;
-    // Revoke previous object URL to avoid memory leaks
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
-    setFileName(file.name);
-    onFileSelected(file);
+  function replaceItems(next) {
+    const retainedIds = new Set(next.map((item) => item.id));
+    itemsRef.current.forEach((item) => {
+      if (!retainedIds.has(item.id)) URL.revokeObjectURL(item.url);
+    });
+    itemsRef.current = next;
+    setItems(next);
+    callbacksRef.current.onFilesChange?.(next.map((item) => item.file));
+    callbacksRef.current.onFileSelected?.(next.length ? next[next.length - 1].file : null);
   }
 
-  function handleClear() {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(null);
-    setFileName(null);
-    onFileSelected(null);
-    // Reset hidden inputs so the same file can be re-selected
-    if (fileInputRef.current)   fileInputRef.current.value   = "";
-    if (cameraInputRef.current) cameraInputRef.current.value = "";
+  function resetInputs() {
+    if (uploadRef.current) uploadRef.current.value = "";
+    if (cameraRef.current) cameraRef.current.value = "";
   }
+
+  function addFiles(fileList) {
+    if (disabled) return;
+    const files = Array.from(fileList || []).filter((file) => file.type.startsWith("image/"));
+    resetInputs();
+    if (!files.length) return;
+    // In single-image mode only create a URL for the image we actually keep.
+    const selected = isMulti ? files : [files[files.length - 1]];
+    const added = selected.map((file) => ({
+      id: crypto.randomUUID(),
+      file,
+      url: URL.createObjectURL(file),
+    }));
+    replaceItems(isMulti ? [...itemsRef.current, ...added] : added);
+  }
+
+  function clear() {
+    replaceItems([]);
+    resetInputs();
+  }
+
+  useEffect(() => {
+    if (lastResetKey.current !== resetKey) {
+      lastResetKey.current = resetKey;
+      clear();
+    }
+    // Only react to changes in resetKey, not parent callback identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetKey]);
+
+  useEffect(() => () => {
+    itemsRef.current.forEach((item) => URL.revokeObjectURL(item.url));
+    itemsRef.current = [];
+  }, []);
+
+  const buttonClass = "inline-flex items-center justify-center gap-2 rounded-lg border border-ledger-line bg-ledger-panel/50 px-4 py-2.5 text-sm font-medium text-ledger-paper/90 transition-all duration-200 hover:border-ledger-gold hover:text-ledger-gold hover:bg-ledger-gold/15 hover:shadow-[0_0_16px_rgba(232,163,61,0.25)] hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ledger-gold disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0";
 
   return (
     <div className="space-y-4">
-      {/* Action buttons */}
-      <div className="flex flex-wrap gap-3">
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-ledger-line hover:border-ledger-gold hover:text-ledger-gold transition-colors text-sm font-medium"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          Upload photo
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        <button type="button" disabled={disabled} onClick={() => uploadRef.current?.click()} className={buttonClass}>
+          <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" /></svg>
+          {isMulti ? (items.length ? "Add Images" : "Upload Images") : "Upload Photo"}
         </button>
-        <button
-          type="button"
-          onClick={() => cameraInputRef.current?.click()}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-ledger-line hover:border-ledger-gold hover:text-ledger-gold transition-colors text-sm font-medium"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          Take a photo
+        <button type="button" disabled={disabled} onClick={() => cameraRef.current?.click()} className={buttonClass}>
+          <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8a2 2 0 012-2h2l1.5-2h7L17 6h2a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/><circle cx="12" cy="13" r="3.5" /></svg>
+          Take a Photo
         </button>
-
-        {previewUrl && (
+        {items.length > 0 && (
           <button
             type="button"
-            onClick={handleClear}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-ledger-rotten/50 text-ledger-rotten hover:bg-ledger-rotten/10 transition-colors text-sm font-medium"
+            disabled={disabled}
+            onClick={clear}
+            className="rounded-lg border border-rose-500/50 bg-rose-950/20 px-4 py-2.5 text-sm font-medium text-rose-400 transition-all duration-200 hover:bg-rose-500/20 hover:border-rose-400 hover:shadow-[0_0_16px_rgba(239,68,68,0.25)] hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500 disabled:opacity-50"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            Remove
+            Clear All
           </button>
         )}
       </div>
 
-      {/* Hidden inputs */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => handleFile(e.target.files?.[0])}
-      />
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={(e) => handleFile(e.target.files?.[0])}
-      />
+      <input ref={uploadRef} type="file" accept="image/*" multiple={isMulti} className="hidden" aria-label="Choose produce images" onChange={(event) => addFiles(event.target.files)} disabled={disabled} />
+      <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" aria-label="Take a produce photo" onChange={(event) => addFiles(event.target.files)} disabled={disabled} />
 
-      {/* Preview */}
-      {previewUrl ? (
-        <div className="rounded-xl overflow-hidden border border-ledger-line max-w-sm relative group">
-          <img
-            src={previewUrl}
-            alt="Selected produce"
-            className="w-full h-60 object-cover"
-          />
-          {fileName && (
-            <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-black/50 backdrop-blur-sm text-xs text-ledger-paper/70 truncate">
-              {fileName}
-            </div>
-          )}
-        </div>
+      {items.length > 0 ? (
+        <section aria-label="Selected produce images" className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-medium text-ledger-paper/80" aria-live="polite">{items.length} image{items.length === 1 ? "" : "s"} selected</p>
+            <p className="text-xs text-ledger-paper/50">Add more photos or remove any image below</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {items.map((item, index) => (
+              <article key={item.id} className="group min-w-0 overflow-hidden rounded-xl border border-ledger-line bg-ledger-panel/70 transition-all duration-200 hover:border-ledger-gold/60 hover:shadow-[0_0_18px_rgba(232,163,61,0.15)]">
+                <div className="relative aspect-square overflow-hidden bg-ledger-panel">
+                  <img src={item.url} alt={`Selected produce image ${index + 1}`} className="h-full w-full object-cover" />
+                  <span className="absolute left-2 top-2 rounded-md bg-ledger-bg/85 px-2 py-1 text-xs font-semibold text-ledger-paper">{index + 1}</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 sm:p-3">
+                  <span className="min-w-0 flex-1 truncate text-xs text-ledger-paper/70" title={item.file.name}>{item.file.name}</span>
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    aria-label={`Remove image ${index + 1}: ${item.file.name}`}
+                    title="Remove image"
+                    onClick={() => replaceItems(itemsRef.current.filter((entry) => entry.id !== item.id))}
+                    className="shrink-0 rounded-md border border-rose-500/40 bg-rose-950/20 px-2.5 py-1 text-xs font-medium text-rose-400 hover:bg-rose-500/25 hover:border-rose-400 hover:shadow-[0_0_10px_rgba(239,68,68,0.25)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500 disabled:opacity-50 transition-all duration-200"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       ) : (
-        /* Drop-zone placeholder */
-        <div
-          onClick={() => fileInputRef.current?.click()}
-          className="flex flex-col items-center justify-center gap-3 w-full max-w-sm h-48 rounded-xl border-2 border-dashed border-ledger-line hover:border-ledger-gold/60 cursor-pointer transition-colors group"
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => uploadRef.current?.click()}
+          className="flex min-h-44 w-full max-w-lg flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-ledger-line bg-ledger-panel/20 px-4 py-8 text-center text-ledger-paper/60 transition-all duration-200 hover:border-ledger-gold hover:text-ledger-gold hover:bg-ledger-gold/5 hover:shadow-[0_0_22px_rgba(232,163,61,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ledger-gold disabled:opacity-50"
         >
-          <svg className="w-10 h-10 text-ledger-line group-hover:text-ledger-gold/60 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M13.5 12h.008v.008H13.5V12zm0 0h.008v.008H13.5V12zm6.75-6.75a.75.75 0 110 1.5.75.75 0 010-1.5z" />
-          </svg>
-          <p className="text-sm text-ledger-paper/40 group-hover:text-ledger-paper/60 transition-colors">Click to select a photo</p>
-        </div>
+          <svg aria-hidden="true" className="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="8.5" cy="9" r="1.5"/><path strokeLinecap="round" strokeLinejoin="round" d="m4 17 5-5 4 4 3-3 4 4"/></svg>
+          <span className="text-sm font-medium">{isMulti ? "Choose produce images" : "Choose a produce photo"}</span>
+          <span className="text-xs text-ledger-paper/40">Or use Take a Photo to capture an image</span>
+        </button>
       )}
     </div>
   );

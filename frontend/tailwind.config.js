@@ -18,14 +18,17 @@ export default {
         chiliDeep: "#8C3117",
 
         // ── Ledger theme tokens ── used throughout JSX components ──
-        "ledger-bg":     "#12241D",   // dark green background
-        "ledger-panel":  "#1B3229",   // slightly lighter panel
-        "ledger-line":   "#2C4A3C",   // divider / border
-        "ledger-paper":  "#F3EFE2",   // warm off-white text
-        "ledger-gold":   "#E8A33D",   // turmeric/amber accent
-        "ledger-fresh":  "#7FB56E",   // green — fresh verdict
-        "ledger-rotten": "#D8562F",   // red-orange — rotten verdict
-        "ledger-muted":  "#B9C4BB",   // muted sage for secondary text
+        "ledger-bg":          "#12241D",   // dark green background
+        "ledger-panel":       "#1B3229",   // slightly lighter panel
+        "ledger-line":        "#2C4A3C",   // divider / border
+        "ledger-paper":       "#F3EFE2",   // warm off-white text
+        "ledger-gold":        "#E8A33D",   // turmeric/amber gold accent
+        "ledger-gold-hover":  "#F5B041",   // glowing hover gold
+        "ledger-fresh":       "#22C55E",   // green — fresh verdict
+        "ledger-fresh-glow":  "rgba(34, 197, 94, 0.4)",
+        "ledger-rotten":      "#EF4444",   // red — rotten verdict
+        "ledger-rotten-glow": "rgba(239, 68, 68, 0.4)",
+        "ledger-muted":       "#B9C4BB",   // muted sage for secondary text
       },
       fontFamily: {
         serif:   ["Fraunces", "Georgia", "serif"],

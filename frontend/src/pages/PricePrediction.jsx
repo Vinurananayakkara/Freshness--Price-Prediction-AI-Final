@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import VarietyPriceTable from "../components/VarietyPriceTable.jsx";
 import { apiGet, apiPost } from "../api/client.js";
 
 const DEFAULT_FORM = {
@@ -248,7 +249,7 @@ export default function PricePrediction() {
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-ledger-gold text-ledger-bg font-semibold hover:brightness-110 disabled:opacity-60 transition-all"
+            className="btn-gold-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ledger-gold disabled:opacity-60 disabled:hover:translate-y-0 transition-all duration-200"
           >
             {submitting ? (
               <>
@@ -292,25 +293,12 @@ export default function PricePrediction() {
           </p>
 
           {result.varieties && result.varieties.length > 0 && (
-            <div className="mt-6 border-t border-ledger-line pt-4">
-              <p className="text-xs text-ledger-paper/40 uppercase tracking-widest font-mono mb-3">
-                By variety (estimated)
-              </p>
-              <div className="space-y-2">
-                {result.varieties.map((v) => (
-                  <div key={v.name} className="flex items-center justify-between text-sm">
-                    <span className="text-ledger-paper/70">{v.name}</span>
-                    <span className="font-mono text-ledger-paper/90 tabular-nums">
-                      {formatRs(v.wholesale_price)} <span className="text-ledger-paper/30">wholesale</span>
-                      <span className="mx-2 text-ledger-paper/20">·</span>
-                      {formatRs(v.market_price)} <span className="text-ledger-paper/30">market</span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-ledger-paper/30 mt-3">
-                Estimated from typical variety price spreads, not identified from a photo.
-              </p>
+            <div className="mt-6 border-t border-ledger-line pt-5">
+              <VarietyPriceTable
+                varieties={result.varieties}
+                title="By variety (estimated)"
+                disclaimer="Estimated from typical variety price spreads, not identified from a photo."
+              />
             </div>
           )}
         </div>
