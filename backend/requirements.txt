@@ -67,3 +67,5 @@ uvicorn==0.51.0
 wheel==0.47.0
 wrapt==2.2.2
 xgboost==3.3.0
+torch
+transformers
